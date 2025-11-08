@@ -8,7 +8,10 @@ select cte2.customer_id, cte2.sum_rev, cte2.ranking from cte2 where ranking betw
 
 Customer Retention Rate
 2. Count how many customers placed orders in both January 2024 and February 2024.
-2. 
+2. with  cte1 as (select  customer_id from orders where month(order_date) = 'January' 
+and customer_id in 
+(select  distinct customer_id from orders where month(order_date) = 'January'))
+select count
 
 Cohort Analysis (Month of First Purchase)
 3. Find for each customer their first purchase month and the total number of orders they’ve made since.
