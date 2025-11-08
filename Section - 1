@@ -31,13 +31,20 @@ Spending Growth
 6. 
 
 Churned Customers
-List customers who placed an order in 2024 but not in 2025.
+7. List customers who placed an order in 2024 but not in 2025.
+7. select distinct customer_id from orders where year(order_date) = '2024'
+not in 
+(select distinct customer_id from orders where year(order_date) = '2025')
 
 Customer Segmentation
-Categorize customers into tiers based on their total spend:
-
+8. Categorize customers into tiers based on their total spend: 
 Platinum (≥ ₹10,000)
-
 Gold (₹5,000–₹9,999)
-
 Silver (< ₹5,000)
+8. select customer_id, case
+when sum(price) >= 10000 then 'platinum'
+when sum(price) >= 5000 and sum(price) <=9999 then 'Gold'
+else 'Silver'
+end as customer_category
+from orders
+group by customer_id
