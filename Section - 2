@@ -1,0 +1,25 @@
+⚙️ SECTION 2 — WINDOW FUNCTIONS & ADVANCED LOGIC
+
+Top-N by Category
+Find the top 3 highest-priced products within each category.
+
+Second Highest Salary per Department
+Return the employee(s) with the 2nd highest salary in each department.
+
+Month-over-Month Growth
+For each month, calculate total sales and growth % compared to the previous month.
+
+Rank Orders
+For each customer, assign a rank to their purchases by order date and find customers whose 2nd order was larger than their 1st (similar to one you did 💪).
+
+Running Total
+Show cumulative sales for each day of 2024, ordered by date.
+
+Moving Average
+Calculate the 7-day moving average of daily sales.
+
+Percentage Contribution
+For each product, show what percentage of its category’s total revenue it contributed.
+
+Time-to-Second Purchase
+Calculate the number of days between each customer’s first and second purchase.
