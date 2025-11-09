@@ -7,22 +7,45 @@ select cte1.product_id, product_cat, price from cte1 where rnk <=3
 ORDER BY product_cat, price DESC;  # order by of rak function does not afect the output of query, only affects how the rank is assigned
 
 Second Highest Salary per Department
-Return the employee(s) with the 2nd highest salary in each department.
+2. Return the employee(s) with the 2nd highest salary in each department.
+2. with  cte1 as (select employee_id, employee_name, department, dense_rank () over (partition by department order by salary desc) as rnk from employees)
+select cte1.employee_id, cte1.employee_name, cte1.salary, cte1.department, cte1.rnk from cte1
+where cte1.rnk = 2
 
 Month-over-Month Growth
-For each month, calculate total sales and growth % compared to the previous month.
+3. For each month, calculate total sales and growth % compared to the previous month.
+3. with cte1 as (select month(order_date) as mn, sum(sales) as total_sales from orders group by month(order_date)),
+cte2 as (select cte1.mn, cte1.total_sales, lag(cte1.total_sales) over (order by cte1.mn) as prev_month)
+select cte2.mn, cte2.total_sales, cte2.prev_month, coalesce((cte2.total_sales - cte2.prev_month)/cte2.prev_month)*100,0) as growth
+from cte2
+# For the first month, prev_month_sales will be NULL,
+so growth_percentage will also be NULL.
+That’s expected — you can wrap it in COALESCE or CASE if you want to display “0%” instead.
 
 Rank Orders
-For each customer, assign a rank to their purchases by order date and find customers whose 2nd order was larger than their 1st (similar to one you did 💪).
+4. For each customer, assign a rank to their purchases by order date and find customers whose 2nd order was larger than their 1st (similar to one you did 💪).
+4. with cte1 as (select customer_id, order_date, price, rank() over (partition by customer_id order by order_date) as rnk from orders)
+select c1.customer_id, c1.price as first_order, c2.price as second_order from cte1 c1 join cte1 c2
+on c1.customer_id = c2.customer_id and c1.rnk = 1 and c2.rnk = 2
+where c2.price > c1.price
 
 Running Total
-Show cumulative sales for each day of 2024, ordered by date.
+5. Show cumulative sales for each day of 2024, ordered by date.
+5. 
+
 
 Moving Average
 Calculate the 7-day moving average of daily sales.
 
 Percentage Contribution
-For each product, show what percentage of its category’s total revenue it contributed.
+7. For each product, show what percentage of its category’s total revenue it contributed.
+7. select product_id, sum(sales) as prod_total from products group by product_id
+
+select product_id, category, sum(price) as cat_sum from products_category
+
 
 Time-to-Second Purchase
 Calculate the number of days between each customer’s first and second purchase.
+with cte1 as (select customer_id, order_date, dense_rank() over (partition by customer_id order by order_date) as rnk from orders),
+cte2 as (select cte1.customer_id, cte1.order_date, lag(cte1.order_date) over (partition by customer_id order by cte1.order_date) as prev_date from cte1)
+select cte2.customer_id , datediff(cte2.order_date , cte2.prev_date)  as day_diff from cte2 where prev_date is not null
