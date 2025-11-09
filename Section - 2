@@ -61,13 +61,13 @@ ORDER BY order_date
 
 Percentage Contribution
 7. For each product, show what percentage of its category’s total revenue it contributed.
-7. select product_id, sum(sales) as prod_total from products group by product_id
-
-select product_id, category, sum(price) as cat_sum from products_category
-
+7. with cte1 as (select product_id, prod_cat, sum(sales) as prod_sum from orders group by product_id, prod_cat),
+cte2 as (select cte1.prod_cat, sum(cte1.prod_sum) as cat_sum from cte1 group by cte1.prod_cat)
+select cte1.product_id, cte1.prod_sum, cte2.cat_sum,  (cte1.prod_sum / cte2.cat_sum)*100 as percentage from cte1 join cte2 on cte1.prod_cat = cte2.prod_cat
+order by cte1.product_id, percent_contribution DESC
 
 Time-to-Second Purchase
-Calculate the number of days between each customer’s first and second purchase.
-with cte1 as (select customer_id, order_date, dense_rank() over (partition by customer_id order by order_date) as rnk from orders),
+8. Calculate the number of days between each customer’s first and second purchase.
+8. with cte1 as (select customer_id, order_date, dense_rank() over (partition by customer_id order by order_date) as rnk from orders),
 cte2 as (select cte1.customer_id, cte1.order_date, lag(cte1.order_date) over (partition by customer_id order by cte1.order_date) as prev_date from cte1)
 select cte2.customer_id , datediff(cte2.order_date , cte2.prev_date)  as day_diff from cte2 where prev_date is not null
