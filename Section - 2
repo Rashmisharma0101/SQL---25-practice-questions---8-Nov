@@ -31,8 +31,11 @@ where c2.price > c1.price
 
 Running Total
 5. Show cumulative sales for each day of 2024, ordered by date.
-5. 
-
+5. with cte1 as (Select order_date, sum(sales) as sales_sum from orders group by order_date)
+select cte1.order_date, cte1.sales_sum, sum(sales_sum) over (order by cte1.order_date) as cum_sum
+from cte1
+order by order_date 
+#  sum(sales_sum) over (order by cte1.order_date) as cum_sum finds runnig total via windows function
 
 Moving Average
 Calculate the 7-day moving average of daily sales.
