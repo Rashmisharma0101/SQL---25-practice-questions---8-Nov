@@ -1,7 +1,10 @@
 ⚙️ SECTION 2 — WINDOW FUNCTIONS & ADVANCED LOGIC
 
 Top-N by Category
-Find the top 3 highest-priced products within each category.
+1. Find the top 3 highest-priced products within each category.
+1. with cte1 as (select product_id, product_cat, price, rank() over (partition by product_cat order by price desc) as rnk from products)
+select cte1.product_id, product_cat, price from cte1 where rnk <=3
+ORDER BY product_cat, price DESC;  # order by of rak function does not afect the output of query, only affects how the rank is assigned
 
 Second Highest Salary per Department
 Return the employee(s) with the 2nd highest salary in each department.
