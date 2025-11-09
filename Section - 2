@@ -38,7 +38,26 @@ order by order_date
 #  sum(sales_sum) over (order by cte1.order_date) as cum_sum finds runnig total via windows function
 
 Moving Average
-Calculate the 7-day moving average of daily sales.
+6. Calculate the 7-day moving average of daily sales.
+6. WITH daily_sales AS (
+    SELECT 
+        order_date,
+        SUM(sales) AS daily_sales
+    FROM orders
+    GROUP BY order_date
+)
+SELECT
+    order_date,
+    daily_sales,
+    ROUND(
+        AVG(daily_sales) OVER (
+            ORDER BY order_date
+            ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
+        ),
+        2
+    ) AS moving_avg_7day
+FROM daily_sales
+ORDER BY order_date
 
 Percentage Contribution
 7. For each product, show what percentage of its category’s total revenue it contributed.
