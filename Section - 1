@@ -30,13 +30,25 @@ select cte2.customer_id, cte2.product_cat, cte2.cnt from cte2 where ranking = 1
 
 Spending Growth
 6. For each customer, find whether their spending increased or decreased compared to the previous month.
-6. 
+6.with cte1 as (select customer_id, year(order_date) as yr, month(order_date) as mn, sum(revenue) as total_spend form orders
+group by customer_id, year(order_date), month(order_date)),
+cte2 as (Select cte1.customer_id, cte1.yr, cte1.mn, cte1.total_spend, 
+lag(cte1.total_spend) over (partition by cte1.customer_id order by yr, mn) as prev_spend from cte1
+select cte2.customer_id, cte2.yr, cte2.mn, cte2.total_spend, cte2.prev_spend, case
+when cte2.total_spend > cte2.prev_spend then 'Increased'
+when cte2.total_spend < cte2.prev_spend then 'Decreased'
+when cte2.prev_spend is NULL then 'First Month'
+Else 'No change'
+END as spend_category
+from cte2
+order by cte2.customer_id, cte2.yr, cte2.mn
+
 
 Churned Customers
 7. List customers who placed an order in 2024 but not in 2025.
-7. select distinct customer_id from orders where year(order_date) = '2024'
+7. select distinct customer_id from orders where year(order_date) = 2024 and customer_id
 not in 
-(select distinct customer_id from orders where year(order_date) = '2025')
+(select distinct customer_id from orders where year(order_date) = 2025)
 
 Customer Segmentation
 8. Categorize customers into tiers based on their total spend: 
