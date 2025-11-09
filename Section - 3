@@ -1,0 +1,14 @@
+🔍 SECTION 3 — DATA QUALITY & ERROR DETECTION
+
+Duplicate Detection
+1. Find duplicate customer records with the same name and email.
+1. select customer_name, email, count(email) from customers group by customer_name, email having count(email) > 1
+
+Missing Data Check
+List columns (or rows) that have NULLs in more than 10% of records.
+
+Outlier Orders
+Identify orders where the order amount is greater than 3× the customer’s average order amount.
+
+Suspicious Activity
+Find customers who placed more than 5 orders in a single day.
