@@ -5,10 +5,54 @@ Duplicate Detection
 1. select customer_name, email, count(email) from customers group by customer_name, email having count(email) > 1
 
 Missing Data Check
-List columns (or rows) that have NULLs in more than 10% of records.
+2. List columns (or rows) that have NULLs in more than 10% of records.
+2. select 'name' as column_name,
+100* sum(case when is null then 1 else 0 END) / count(*) as null_percentage
+from customers
+
+union all
+
+select 'email' as column_name,
+100.0 * sum(case when is null then 1 else 0 END) / count(*) as null_percentage
+from customers
+
+union all
+
+select 'phone' as column_name,
+100.0 * sum(case when is null then 1 else 0 END) / count(*) as null_percentage
+from customers
+having  100.0 * sum(case when is null then 1 else 0 END) / count(*) > 10
+
+# you must use HAVING, because the condition depends on an aggregate function (SUM() / COUNT())., Filters groups after aggregation
 
 Outlier Orders
-Identify orders where the order amount is greater than 3× the customer’s average order amount.
+3. Identify orders where the order amount is greater than 3× the customer’s average order amount.
+3. with cte1 as (select customer_id, avg(order_amount) as avg_amount from orders group by customer_id)
+select cte1.customer_id, orders.order_id, orders.order_amount, cte1.avg_amount from orders join cte1 on orders.customer_id = cte1.customer_id
+where orders.order_amount > (3 * cte1.avg_amount)
 
 Suspicious Activity
-Find customers who placed more than 5 orders in a single day.
+4. Find customers who placed more than 5 orders in a single day.
+4. select customer_id, count(order_id) from orders group by customer_id, date(order_date) as order_day having count(order_id) > 5
+order by customer_id, order_day
+
+Bonus:
+SELECT 
+    SUM(price) AS total_sales
+FROM orders
+HAVING SUM(price) > 10000;
+
+🔍 Step 1: Compute the aggregate
+
+SUM(price) = 3000 + 2500 + 2000 + 4000 + 1500 = 13,000
+
+🔍 Step 2: Apply the HAVING filter
+
+HAVING SUM(price) > 10000 → 13,000 > 10,000 ✅ True
+
+🧾 ✅ Output:
+total_sales
+13000
+🧾 ❌ If total was ≤ 10,000:
+
+Then no rows would be returned — you’d just get an empty result (zero rows).
