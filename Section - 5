@@ -1,0 +1,11 @@
+🌟 SECTION 5 — OPTIMIZATION & THINKING QUESTIONS (for senior-level insight)
+
+Explain how you’d optimize a slow query that joins 3 large tables.
+
+When would you prefer a CTE over a subquery?
+
+What’s the impact of NULLs on COUNT, AVG, and JOIN results?
+
+How would you find duplicates without using DISTINCT?
+
+Write a query that returns the same results as a GROUP BY, but using window functions only.
