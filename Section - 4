@@ -1,0 +1,83 @@
+💼 SECTION 4 — CASE STUDY STYLE (INTERVIEW SCENARIOS)
+Scenario: E-commerce Tables
+
+Tables:
+customers(customer_id, name, city, signup_date)
+orders(order_id, customer_id, order_date, amount, payment_type)
+products(product_id, category, price)
+order_items(order_id, product_id, quantity)
+
+Payment Insights
+1. Find which payment type generates the highest total revenue.
+1. select payment_type, sum(amount) as total_rev from orders group by payment_type order by sum(amount) desc limit 1
+
+Category Profitability
+2. Calculate the total revenue per category and the average order value per category.
+2. select products.category, sum(orders.amount), avg(orders.amount)
+from orders join order_items
+on orders.order_id = order_items.order_id
+join products on
+products.product_id = order_items.product_id
+group by products.category
+order by sum(orders.amount) desc, avg(orders.amount) desc
+
+High-Value Days
+3. Find days when total sales exceeded the monthly average.
+3. with cte1 as (select order_date, month(order_date) as mn, avg(amount) as avg_amount from orders group by month(order_date))
+select orders.order_date, orders.amount, cte1.avg_amount from cte1 join orders
+on cte1.order_date = orders.order_date
+where orders.amount > cte1.avg_amount
+
+Customer Order Frequency
+Compute average number of orders per customer per month.
+
+Cross-Selling Potential
+Identify product pairs that are most frequently bought together (you can do this by self-joining order_items on order_id).
+
+Bonus
+If you write:
+
+SELECT payment_type, MAX(amount)
+FROM orders
+GROUP BY payment_type;
+
+
+This gives the maximum single order amount per payment type,
+not the total revenue from that payment type.
+
+So for example 👇
+
+payment_type	amount
+Credit Card	3000
+Credit Card	2500
+UPI	7000
+UPI	2000
+
+MAX(amount) per payment type →
+
+payment_type	max_amount
+Credit Card	3000
+UPI	7000
+
+That’s not the total revenue (which would be 5500 and 9000 respectively).
+
+✅ Correct logic (conceptually, not full query)
+
+First, compute total revenue per payment type:
+→ SUM(amount) GROUP BY payment_type
+
+Then, either:
+
+Sort by total revenue (ORDER BY total_revenue DESC LIMIT 1)
+
+Or find the MAX(SUM(amount)) using a window function.
+
+🔍 Key insight:
+
+MAX() looks at individual rows,
+while SUM() ... GROUP BY aggregates rows into groups.
+
+So your thought:
+
+“I have to first sum and then rank/sort”
+is exactly right 👏
