@@ -13,26 +13,47 @@ Payment Insights
 
 Category Profitability
 2. Calculate the total revenue per category and the average order value per category.
-2. select products.category, sum(orders.amount), avg(orders.amount)
+2. select products.category, SUM(oi.quantity * oi.unit_price) AS total_revenue,
+  AVG(oi.quantity * oi.unit_price) AS avg_order_value
 from orders join order_items
-on orders.order_id = order_items.order_id
 join products on
 products.product_id = order_items.product_id
 group by products.category
-order by sum(orders.amount) desc, avg(orders.amount) desc
+order by total_revenue desc
+
+# One subtle note:
+
+If your orders.amount represents the entire order’s total (not per item),
+then joining with order_items could duplicate rows (because an order may appear multiple times — once per item).
+That would inflate your totals.
+
+So, to avoid double-counting, you’d either:
+
+aggregate from the order_items table itself (summing quantity * price_per_unit), or
+
+use DISTINCT order_id before joining.
 
 High-Value Days
 3. Find days when total sales exceeded the monthly average.
-3. with cte1 as (select order_date, month(order_date) as mn, avg(amount) as avg_amount from orders group by month(order_date))
-select orders.order_date, orders.amount, cte1.avg_amount from cte1 join orders
-on cte1.order_date = orders.order_date
-where orders.amount > cte1.avg_amount
+3. with cte1 as (select order_date, month(order_date) as mn, sum(amount) as total_sales from orders group by date(order_date), month(order_date)),
+cte2 as (select mn, avg(total_sales) as avg_sales from cte1 group by mn)
+select cte1.order_date, cte1.tota_sales, cte2.avg_sales from cte1 join cte2 on cte1.mn = cte2.mn
+where cte1.total_sales > cte2.avg_sales
 
 Customer Order Frequency
-Compute average number of orders per customer per month.
+4. Compute average number of orders per customer per month.
+4. with cte1 as (select customer_id, month(order_date) as mn, count(order_id) as cnt from orders
+group by customer_id, month(order_date))
+select cte1.customer_id,  avg(cte1.cnt) as avg_cnt from cte1 group by cte1.customer_id
+order by avg_cnt desc
 
 Cross-Selling Potential
-Identify product pairs that are most frequently bought together (you can do this by self-joining order_items on order_id).
+5. Identify product pairs that are most frequently bought together (you can do this by self-joining order_items on order_id).
+5. with cte1 as (select o1.product_id as prod1, o2.product_id as prod2 from order_items o1 join order_items o2
+on o1.order_id = o2.order_id)
+select cte1.prod1, cte1.prod2, count(*) as frequency from cte1 
+group by cte1.prod1, cte1.prod2
+order by count(*) desc
 
 Bonus
 If you write:
